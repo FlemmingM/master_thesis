@@ -465,9 +465,11 @@ ggsave("FOT_blank_solu_IND_plot_2019-07-12.png",  dpi=500, width = 8, height = 7
 
 # test if there is a significant difference between the max temperature of the different samples - THIS DOES NOT MAKE SENSE --> ONLY n=1
 
-fot3_max <- fot3 %>% group_by(sample) %>% summarise(max = max(value))
-anova_fot <- aov(max ~ sample, data = fot3_max) %>% tidy()
+#fot3_max <- fot3 %>% group_by(sample) %>% summarise(max = max(value))
+anova_fot <- aov(value ~ sample, data = fot3) %>% tidy()
 anova_fot
+
+print(xtable(anova_fot, type='latex'))
 
 #############################################################################################################################################
 
@@ -848,7 +850,7 @@ pvp_data2 <- na.omit(pvp_data)
 
 pvp_data2 <- pvp_data2 %>% filter(theoret_conc_drug == 30, theoret_conc_agent == 13.8) # %>% group_by(time) %>%  summarise(mean = mean(AUC_weight), sd =sd(AUC_weight))
 
-write.csv(pvp_data2, 'pvp_database_thesis_2019-08-09.csv')
+#write.csv(pvp_data2, 'pvp_database_thesis_2019-08-09.csv')
 
 pvp_data3 <- pvp_data2 %>% group_by(time) %>%  summarise(mean = mean(AUC_weight), sd =sd(AUC_weight))
 
@@ -1051,7 +1053,7 @@ pvp_data %>% filter(AUC_weight == 0, polymer=='PVP12', theoret_conc_agent !=0)  
 pvp_data_am <- pvp_data %>% filter(AUC_weight == 0, polymer=='PVP12', theoret_conc_agent !=0)  %>% 
   group_by(theoret_conc_drug, theoret_conc_agent) %>% summarise(time_am=mean(time), time_sd=sd(time), max_time = max(time), min_time = min(time))
 
-pvp_data_am$compact <- c('Compact 1 (n=3)', 'Compact 2 (n=3)','Compact 3 (n=7)','Compact 4 (n=1)','Compact 6 (n=6)')
+pvp_data_am$compact <- c('PVP 30I/6.9G (n=3)', 'PVP 30I/10.3G (n=3)','PVP 30I/13.8G (n=7)','PVP 40I/5.9G (n=1)','PVP 40I/11.8G (n=6)')
 
 ggplot(pvp_data_am, aes(x=time_am, y=compact, colour=compact))+
   geom_point(size=3)+
@@ -1160,12 +1162,25 @@ ggplot(gly_tg_dma, aes(x=temp, y=Tan_Delta))+
 
 
 
+fot4 <- fot2
+
+fot4$mean <- rowMeans(fot2[,2:6])
+fot4$time <- fot2$time/60
+
+ggplot(fot4, aes(x=time, y=mean))+
+  #geom_line(size=1)+
+  geom_smooth(method = 'lm', formula = y ~ poly(x, 6), se = F)+
+  #geom_hline(yintercept = 100, linetype='dotted')+
+  my_theme2()+
+  #theme(legend.position = c(0.75,0.15))+
+  #scale_color_manual("" ,  labels= c( 'SOL 25I/20G', 'SOL 38I/20G',
+  #                                    'SOL 51I/20G', 'SOL 25I/25G','SOL 25I/15G'),
+  #                   values = c("#E41A1C", "#377EB8", "#4DAF4A",'#00FFFF', '#FF8000' ))+ # it should be drug polymer ratio "#FF8000","#E41A1C", "#00FFFF")+
+  #scale_x_continuous(breaks = seq(0,20, by=1), limits = c(0,20))+
+  labs(y='Temperature [°C]', x='Time [min]')
 
 
-
-
-
-
+ggsave("FOT_solu_IND_ideal_plot_2019-08-28.png",  dpi=500, width = 8, height = 7 )
 
 
 
